@@ -1,0 +1,39 @@
+import requests
+
+
+def recipe_search(ingredient):
+    app_id = 'd394cb93'
+    app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
+    result = requests.get('https://api.edamam.com/search?q={}&app_id={}&app_key={}'.format(ingredient, app_id, app_key))
+    data = result.json()
+    return data['hits']
+
+
+def recipe_search2(cuisineType):
+    app_id = 'd394cb93'
+    app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
+    result = requests.get(
+    'https://api.edamam.com/search?q={}&app_id={}&app_key={}'.format(cuisineType, app_id, app_key))
+    data = result.json()
+    return data['hits']
+
+
+def run():
+    ingredient = input('Enter an ingredient: ')
+    results1 = recipe_search(ingredient)
+    for result1 in results1:
+        recipe = result1['recipe']
+
+    input('Enter a cuisine type: ')
+    results2 = recipe_search2(recipe['cuisineType'])
+    for result2 in results2:
+        recipe2 = result2['cuisineType']
+
+    if recipe and recipe2:
+        print(recipe['label'])
+        print(recipe['url'])
+        print(recipe['cuisineType'])
+        print()
+
+
+run()
