@@ -1,39 +1,80 @@
+Wow I really love your code! That's so clever! I am now so tempted by all the italian recipes with raspberries in though 😂 Here is one way that the code can work together:
+# Project Two
+# https://developer.edamam.com//admin/applications/1409623208044
+
 import requests
 
 
-def recipe_search(ingredient):
-    app_id = 'd394cb93'
-    app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
-    result = requests.get('https://api.edamam.com/search?q={}&app_id={}&app_key={}'.format(ingredient, app_id, app_key))
-    data = result.json()
-    return data['hits']
+# Extension One and Two
+# One - save the results to a file
+# Two - additional user input to filter results
 
-
-def recipe_search2(cuisineType):
-    app_id = 'd394cb93'
-    app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
-    result = requests.get(
-    'https://api.edamam.com/search?q={}&app_id={}&app_key={}'.format(cuisineType, app_id, app_key))
-    data = result.json()
-    return data['hits']
+all_recipe_information = []
 
 
 def run():
-    ingredient = input('Enter an ingredient: ')
-    results1 = recipe_search(ingredient)
-    for result1 in results1:
-        recipe = result1['recipe']
+    ingredient = input("Enter an ingredient to search recipes: ")
+    def recipe_search(ingredient):
+        app_id = 'd394cb93'
+        app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
+        result = requests.get(
+            'https://api.edamam.com/search?q={}&app_id={}&app_key={}'.format(ingredient, app_id, app_key))
+        data = result.json()
+        return data['hits']
+    results = recipe_search(ingredient)
 
-    input('Enter a cuisine type: ')
-    results2 = recipe_search2(recipe['cuisineType'])
-    for result2 in results2:
-        recipe2 = result2['cuisineType']
+    choose_filter = input("Do you want to filter your search by cuisine type? y/n: ")
 
-    if recipe and recipe2:
-        print(recipe['label'])
-        print(recipe['url'])
-        print(recipe['cuisineType'])
-        print()
+    if choose_filter == 'y':
+        cuisine_type = input("Please choose a cuisine type (eg. Italian, Japanese, American, etc.): ")
+
+        def recipe_search(cuisine_type):
+            app_id = 'd394cb93'
+            app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
+            result = requests.get('https://api.edamam.com/search?q={}&cuisineType={}&app_id={}&app_key={}'.format(ingredient, cuisine_type, app_id, app_key))
+            data = result.json()
+            return data['hits']
+        results = recipe_search(cuisine_type)
+        for result in results:
+            recipe = result['recipe']
+            name = recipe['label']
+            url = recipe['url']
+            time = recipe['totalTime']
+            cuisine_type = recipe['cuisineType']
+            recipe_dict = dict(recipe_name=name, recipe_url=url, recipe_time=time, cuisine=cuisine_type)
+            all_recipe_information.append(recipe_dict)
+            print(recipe['label'])
+            print(recipe['url'])
+            print(recipe['cuisineType'])
+            print()
+
+    else:
+        for result in results:
+            recipe = result['recipe']
+            name = recipe['label']
+            url = recipe['url']
+            time = recipe['totalTime']
+            recipe_dict = dict(recipe_name=name, recipe_url=url, recipe_time=time)
+            all_recipe_information.append(recipe_dict)
+            recipe = result['recipe']
+            print(recipe['label'])
+            print(recipe['url'])
+            print()
 
 
 run()
+
+
+with open('recipe_information.txt', 'w+') as recipe_file:
+    for row in all_recipe_information:
+        recipe_file.write(str(row) + '\n')
+# I wonder how to remove the () in the final document?
+
+
+# Extension Three - order by the time it takes to make it
+sorted_by_time = sorted(all_recipe_information, key=lambda x: x['recipe_time'])  # returns parameter recipe_time
+
+
+with open('recipe_information_sorted_by_time.txt', 'w+') as recipe_file_by_time:
+    for row in sorted_by_time:
+        recipe_file_by_time.write(str(row) + '\n')
