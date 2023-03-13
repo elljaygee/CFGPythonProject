@@ -23,30 +23,83 @@ def run():
         return data['hits']
     results = recipe_search(ingredient)
 
-    choose_filter = input("Do you want to filter your search by cuisine type? y/n: ")
+    choose_filter = input("Do you want to add any filters to your search? y/n: ")
 
     if choose_filter == 'y':
-        cuisine_type = input("Please choose a cuisine type (eg. Italian, Japanese, American, etc.): ")
+        add_filter = input("Please choose an additional filter: cuisine type, health restrictions, meal type: ")
 
-        def recipe_search(cuisine_type):
-            app_id = 'd394cb93'
-            app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
-            result = requests.get('https://api.edamam.com/search?q={}&cuisineType={}&app_id={}&app_key={}'.format(ingredient, cuisine_type, app_id, app_key))
-            data = result.json()
-            return data['hits']
-        results = recipe_search(cuisine_type)
-        for result in results:
-            recipe = result['recipe']
-            name = recipe['label']
-            url = recipe['url']
-            time = recipe['totalTime']
-            cuisine_type = recipe['cuisineType']
-            recipe_dict = dict(recipe_name=name, recipe_url=url, recipe_time=time, cuisine=cuisine_type)
-            all_recipe_information.append(recipe_dict)
-            print(recipe['label'])
-            print(recipe['url'])
-            print(recipe['cuisineType'])
-            print()
+        if add_filter == 'cuisine type':
+            cuisine_type = input("Please choose a cuisine type (eg. Italian, Japanese, American, etc.): ")
+            def recipe_search(cuisine_type):
+                app_id = 'd394cb93'
+                app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
+                result = requests.get('https://api.edamam.com/search?q={}&cuisineType={}&app_id={}&app_key={}'.format(ingredient, cuisine_type, app_id, app_key))
+                data = result.json()
+                return data['hits']
+            results = recipe_search(cuisine_type)
+            for result in results:
+                recipe = result['recipe']
+                name = recipe['label']
+                url = recipe['url']
+                time = recipe['totalTime']
+                cuisine_type = recipe['cuisineType']
+                recipe_dict = dict(recipe_name=name, recipe_url=url, recipe_time=time, cuisine=cuisine_type)
+                all_recipe_information.append(recipe_dict)
+                print(recipe['label'])
+                print(recipe['url'])
+                print(recipe['cuisineType'])
+                print()
+
+        elif add_filter == "health restrictions":
+            health_type = input("Please add a specific health restriction to your search (eg. vegetarian, wheat-free, keto-friendly): ")
+            def recipe_search(health_type):
+                app_id = 'd394cb93'
+                app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
+                result = requests.get(
+                    'https://api.edamam.com/search?q={}&healthLabels={}&app_id={}&app_key={}'.format(ingredient,
+                                                                                                    health_type,
+                                                                                                    app_id, app_key))
+                data = result.json()
+                return data['hits']
+            results = recipe_search(health_type)
+            for result in results:
+                recipe = result['recipe']
+                name = recipe['label']
+                url = recipe['url']
+                time = recipe['totalTime']
+                health_type = recipe['healthLabels']
+                recipe_dict = dict(recipe_name=name, recipe_url=url, recipe_time=time, health=health_type)
+                all_recipe_information.append(recipe_dict)
+                print(recipe['label'])
+                print(recipe['url'])
+                print(recipe['dietLabels'])
+                print(recipe['healthLabels'])
+                print()
+
+        elif add_filter == "meal type":
+            meal_type = input("Please add a meal type to your search (eg. breakfast, lunch, etc.): ")
+            def recipe_search(meal_type):
+                app_id = 'd394cb93'
+                app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
+                result = requests.get(
+                    'https://api.edamam.com/search?q={}&mealType={}&app_id={}&app_key={}'.format(ingredient,
+                                                                                                    meal_type,
+                                                                                                    app_id, app_key))
+                data = result.json()
+                return data['hits']
+            results = recipe_search(meal_type)
+            for result in results:
+                recipe = result['recipe']
+                name = recipe['label']
+                url = recipe['url']
+                time = recipe['totalTime']
+                meal_type = recipe['mealType']
+                recipe_dict = dict(recipe_name=name, recipe_url=url, recipe_time=time, meal=meal_type)
+                all_recipe_information.append(recipe_dict)
+                print(recipe['label'])
+                print(recipe['url'])
+                print(recipe['mealType'])
+                print()
 
     else:
         for result in results:
