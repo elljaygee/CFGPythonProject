@@ -2,132 +2,101 @@
 # Project Two
 # https://developer.edamam.com//admin/applications/1409623208044
 
+# load required packages
+# the requests library allows you to make HTTP requests quickly & easily
 import requests
 
+# app_id and app_key from the Edamam API website to allow developer access
+app_id = 'd394cb93'
+app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
 
-# Extension One and Two
-# One - save the results to a file
-# Two - additional user input to filter results
+# Extension One - allow for additional user input to filter results
 
+# create an empty list to save search results
 all_recipe_information = []
 
 
+# create a function to request data from the Edamam API
+def recipe_search(url):
+    result = requests.get(url)
+    data = result.json()
+    return data['hits']
+
+
+# create a function to get user input, print the results and save to a dictionary
 def run():
-    ingredient = input("Enter an ingredient to search recipes: ")
-    def recipe_search(ingredient):
-        app_id = 'd394cb93'
-        app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
-        result = requests.get(
-            'https://api.edamam.com/search?q={}&app_id={}&app_key={}'.format(ingredient, app_id, app_key))
-        data = result.json()
-        return data['hits']
-    results = recipe_search(ingredient)
+    # initial query to get basic user input
+    ingredient = input('Enter an ingredient to search recipes: ')
+    # additional/optional queries to ask for more detailed user input
+    cuisine_type_filter = input('If you would like to filter your results by cuisine type '
+                                '(e.g. Italian, Japanese, etc), '
+                                'please add that info here; otherwise just hit Enter: ')
+    diet_restriction_filter = input('If you would like to filter your results by dietary restriction '
+                                    '(e.g. vegan, vegetarian, etc), '
+                                    'please add that info here; otherwise just hit Enter: ')
 
-    choose_filter = input("Do you want to add any filters to your search? y/n: ")
+    # define defaults of no user input for cuisine- and diet-types and a default url (ingredient only)
+    cuisine_type = 'n'
+    diet_type = 'n'
+    url = 'https://api.edamam.com/search?q={}&app_id={}&app_key={}'.format(ingredient, app_id, app_key)
 
-    if choose_filter == 'y':
-        add_filter = input("Please choose an additional filter: cuisine type, health restrictions, meal type: ")
+    # check for answers to see if not an empty string, i.e. has the user input anything?
+    if cuisine_type_filter != "":
+        cuisine_type = 'y'
+    if diet_restriction_filter != "":
+        diet_type = 'y'
 
-        if add_filter == 'cuisine type':
-            cuisine_type = input("Please choose a cuisine type (eg. Italian, Japanese, American, etc.): ")
-            def recipe_search(cuisine_type):
-                app_id = 'd394cb93'
-                app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
-                result = requests.get('https://api.edamam.com/search?q={}&cuisineType={}&app_id={}&app_key={}'.format(ingredient, cuisine_type, app_id, app_key))
-                data = result.json()
-                return data['hits']
-            results = recipe_search(cuisine_type)
-            for result in results:
-                recipe = result['recipe']
-                name = recipe['label']
-                url = recipe['url']
-                time = recipe['totalTime']
-                cuisine_type = recipe['cuisineType']
-                recipe_dict = dict(recipe_name=name, recipe_url=url, recipe_time=time, cuisine=cuisine_type)
-                all_recipe_information.append(recipe_dict)
-                print(recipe['label'])
-                print(recipe['url'])
-                print(recipe['cuisineType'])
-                print()
+    # using if & elif statements to add additional filters to the API request URL, dependent on user input
+    if cuisine_type == 'y' and diet_type == 'y':
+        url = 'https://api.edamam.com/search?q={}&app_id={}&app_key={}&health={}&cuisineType={}'.format(
+                ingredient, app_id, app_key, diet_restriction_filter, cuisine_type_filter)
 
-        elif add_filter == "health restrictions":
-            health_type = input("Please add a specific health restriction to your search (eg. vegetarian, wheat-free, keto-friendly): ")
-            def recipe_search(health_type):
-                app_id = 'd394cb93'
-                app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
-                result = requests.get(
-                    'https://api.edamam.com/search?q={}&healthLabels={}&app_id={}&app_key={}'.format(ingredient,
-                                                                                                    health_type,
-                                                                                                    app_id, app_key))
-                data = result.json()
-                return data['hits']
-            results = recipe_search(health_type)
-            for result in results:
-                recipe = result['recipe']
-                name = recipe['label']
-                url = recipe['url']
-                time = recipe['totalTime']
-                health_type = recipe['healthLabels']
-                recipe_dict = dict(recipe_name=name, recipe_url=url, recipe_time=time, health=health_type)
-                all_recipe_information.append(recipe_dict)
-                print(recipe['label'])
-                print(recipe['url'])
-                print(recipe['dietLabels'])
-                print(recipe['healthLabels'])
-                print()
+    elif cuisine_type == 'n' and diet_type == 'n':
+        url = 'https://api.edamam.com/search?q={}&app_id={}&app_key={}'.format(
+                ingredient, app_id, app_key)
 
-        elif add_filter == "meal type":
-            meal_type = input("Please add a meal type to your search (eg. breakfast, lunch, etc.): ")
-            def recipe_search(meal_type):
-                app_id = 'd394cb93'
-                app_key = 'a58784cc25fc7f7776e5b18965b3db2b'
-                result = requests.get(
-                    'https://api.edamam.com/search?q={}&mealType={}&app_id={}&app_key={}'.format(ingredient,
-                                                                                                    meal_type,
-                                                                                                    app_id, app_key))
-                data = result.json()
-                return data['hits']
-            results = recipe_search(meal_type)
-            for result in results:
-                recipe = result['recipe']
-                name = recipe['label']
-                url = recipe['url']
-                time = recipe['totalTime']
-                meal_type = recipe['mealType']
-                recipe_dict = dict(recipe_name=name, recipe_url=url, recipe_time=time, meal=meal_type)
-                all_recipe_information.append(recipe_dict)
-                print(recipe['label'])
-                print(recipe['url'])
-                print(recipe['mealType'])
-                print()
+    elif cuisine_type == 'y' and diet_type == 'n':
+        url = 'https://api.edamam.com/search?q={}&app_id={}&app_key={}&cuisineType={}'.format(
+                ingredient, app_id, app_key, cuisine_type_filter)
 
-    else:
-        for result in results:
-            recipe = result['recipe']
-            name = recipe['label']
-            url = recipe['url']
-            time = recipe['totalTime']
-            recipe_dict = dict(recipe_name=name, recipe_url=url, recipe_time=time)
-            all_recipe_information.append(recipe_dict)
-            recipe = result['recipe']
-            print(recipe['label'])
-            print(recipe['url'])
-            print()
+    elif cuisine_type == 'n' and diet_type == 'y':
+        url = 'https://api.edamam.com/search?q={}&app_id={}&app_key={}&health={}'.format(
+                ingredient, app_id, app_key, diet_restriction_filter)
 
+    results = recipe_search(url)  # run the function recipe_search using the appropriate url as defined above
+
+    # loop through each recipe in results to find the name, url and number of servings
+    for result in results:
+        recipe = result['recipe']
+        recipe_name = recipe['label']
+        recipe_url = recipe['url']
+        number_of_servings = recipe['yield']
+        # save the above information to a dictionary
+        recipe_dict = dict(recipe_name=recipe_name, recipe_url=recipe_url, servings=number_of_servings)
+        # add the dictionary for each specific recipe to the overall results list
+        all_recipe_information.append(recipe_dict)
+        # print the recipe name and url to the screen
+        print(recipe['label'])
+        print(recipe['url'])
 
 run()
 
-
+# Extension Two - save all results to a file called recipe_information.txt
 with open('recipe_information.txt', 'w+') as recipe_file:
     for row in all_recipe_information:
-        recipe_file.write(str(row) + '\n')
-# I wonder how to remove the () in the final document?
+        name = "The recipe name is " + row["recipe_name"] + "\n"
+        url = "The url is " + row["recipe_url"] + "\n"
+        recipe_file.write(name + url + "\n")
 
 
-# Extension Three - order by the time it takes to make it
-sorted_by_time = sorted(all_recipe_information, key=lambda x: x['recipe_time'])  # returns parameter recipe_time
+# Extension Three - order results in another saved file by the number of servings
+sorted_by_servings = sorted(all_recipe_information, key=lambda x: x['servings'])  # returns the parameter servings
 
-
-with open('recipe_information_sorted_by_time.txt', 'w+') as recipe_file_by_time:
-    for row in sorted_by_time:
-        recipe_file_by_time.write(str(row) + '\n')
+with open('recipe_information_sorted_by_servings.txt', 'w+') as recipe_file_by_servings:
+    for row in sorted_by_servings:
+        name = "The recipe name is " + row["recipe_name"] + "\n"
+        url = "The url is " + row["recipe_url"] + "\n"
+        servings = "The number of servings is " + str(row["servings"]) + "\n"
+        # need to convert row["servings"] to a string as the values associated with the key servings are integers
+        # you can only write string data types to txt files
+        recipe_file_by_servings.write(name + url + servings + "\n")
